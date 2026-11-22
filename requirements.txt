@@ -1,0 +1,2 @@
+# Required only for decoding/resizing/tile operations on image textures.
+Pillow>=9.0

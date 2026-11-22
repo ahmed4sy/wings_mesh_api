@@ -1,0 +1,10 @@
+type "py"
+name ?__(1, "Parametric Box")
+mode "shape"
+desc ?__(2, "Create a validated box using the Wings Python Mesh API")
+params_title ?__(3, "Box Dimensions")
+params {
+    param "Width" "2.0"
+    param "Depth" "2.0"
+    param "Height" "2.0"
+}
