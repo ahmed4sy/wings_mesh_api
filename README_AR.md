@@ -1,12 +1,15 @@
-# Wings Mesh API 1.2.0 — Textures and UV Release
+# Wings Mesh API 1.3.0 — Batch Modeling and Primitives
 
 طبقة Python مستقرة فوق `wpc_scripting_shapes`، مع Bootstrap يُفعّل الاستيراد من أي مجلد سكربتات داخل محرك Wings.
 
-هذه الطبقة تضيف واجهة Python أعلى إضافة `wpc_scripting_shapes` المرفقة من المستخدم. الفكرة هي فصل بناء المجسم والتحقق من سلامة بنيته والحسابات الرقمية عن بروتوكول Wings 3D، ثم تحويل النموذج إلى كائن `E3D` الذي تتوقعه الإضافة.
+الإصدار 1.3 يضيف واجهات دفعات ومولّدات أشكال ومجسمات جاهزة فوق الأساس المستقر للإصدارين 1.1 و1.2. هذه الطبقة تضيف واجهة Python أعلى إضافة `wpc_scripting_shapes` المرفقة من المستخدم. الفكرة هي فصل بناء المجسم والتحقق من سلامة بنيته والحسابات الرقمية عن بروتوكول Wings 3D، ثم تحويل النموذج إلى كائن `E3D` الذي تتوقعه الإضافة.
 
 ## ما الذي تتضمنه؟
 
-- **Mesh:** إضافة الرؤوس والوجوه، دمج Mesh، التحقق من البنية، والتحويل إلى `new_shape`.
+- **Mesh:** إضافة الرؤوس والوجوه فردياً أو على دفعات، إنشاء الأشكال والمجسمات الجاهزة، دمج Mesh، التحقق من البنية، والتحويل إلى `new_shape`.
+- **Batch API:** `add_vertices()` و`add_vertexs()` و`add_faces()` و`add_polygon()` لتقليل تكرار الكتابة.
+- **Primitive Library:** مكعب وصندوق ومستوى وهرم وأسطوانة ومخروط وكرة وحلقة، مع تحكم في الأبعاد والتقسيمات.
+- **Cleanup:** `weld_vertices()` و`remove_doubles()` لدمج الرؤوس المتقاربة بشكل صريح.
 - **Topology:** استخراج الحواف، الوجوه المتصلة بكل حافة، الجوار، الحواف الحدودية وغير المتعددة.
 - **Selection:** تحديد محلي للرؤوس والحواف والوجوه. هذا التحديد يعمل على كائن `Mesh` في Python.
 - **Geometry:** normals، المساحات، المراكز، الأطوال، bounding box، المساحة السطحية والحجم، والتحويلات.
@@ -89,18 +92,26 @@ python3 uninstall_flatpak.py
 python3 uninstall_flatpak.py --remove-package
 ```
 
-## مثال الاستخدام
+## مثال الاستخدام — واجهات 1.3
 
 ```python
 from wings import Mesh
 
-mesh = Mesh("Quad")
-v1 = mesh.add_vertex((0, 0, 0))
-v2 = mesh.add_vertex((1, 0, 0))
-v3 = mesh.add_vertex((1, 1, 0))
-v4 = mesh.add_vertex((0, 1, 0))
-mesh.add_face([v1, v2, v3, v4])
+mesh = Mesh("QuickModel")
+
+# Create a square face with four vertices in one call
+Vs = mesh.add_vertexs(shape="sqr", pos=(0, 0, 0), size=2)
+mesh.add_face(Vs)
+
+# Add complete ready-made objects
+mesh.add_primitive("cube", pos=(3, 0, 0), size=2)
+mesh.add_primitive("sphere", pos=(-3, 0, 0), radius=1)
+
+# Add a grid with 4 by 4 quad cells
+mesh.add_grid(pos=(0, 3, 0), size=4, segments=(4, 4))
 ```
+
+لإضافة دفعة من الإحداثيات استخدم `mesh.add_vertices([...])`، ولإنشاء مجموعة وجوه استخدم `mesh.add_faces([...])`. لا تدمج الدوال الرؤوس المتطابقة تلقائياً؛ استخدم `mesh.weld_vertices(tolerance=0.001)` عند الحاجة إلى الدمج. راجع `docs/PRIMITIVES_API.md` لكل المعاملات والافتراضيات.
 
 لإرسال الشكل من سكربت مستضاف داخل الإضافة، عرّف دالة الإدخال وأعد نتيجة `create()` منها:
 
@@ -137,7 +148,7 @@ mesh.assign_material(1, red_material)
 return mesh.create(prefix="ColoredCube")
 ```
 
-راجع `docs/COLOR_AND_MATERIAL_API.md` للشرح الكامل. الألوان تُرسل إلى E3D؛ alpha لا ينتقل مع Vertex Colors لأن جدول E3D الأصلي يخزن RGB فقط. لإظهارها داخل Wings فعّل `View → Show Colors` و`View → Show Materials` بحسب نوع اللون. دعم الصور وUV أضيف في الإصدار 1.2.0، مع تفاصيله وحدوده في `docs/TEXTURE_UV_API.md`.
+راجع `docs/COLOR_AND_MATERIAL_API.md` للشرح الكامل. الألوان تُرسل إلى E3D؛ alpha لا ينتقل مع Vertex Colors لأن جدول E3D الأصلي يخزن RGB فقط. لإظهارها داخل Wings فعّل `View → Show Colors` و`View → Show Materials` بحسب نوع اللون. دعم الصور وUV أضيف في الإصدار 1.2.0، وتوسعت واجهة بناء الشبكات في 1.3.0، مع تفاصيله وحدوده في `docs/TEXTURE_UV_API.md`.
 
 ## Core المعاملات والبكرة
 
@@ -204,9 +215,11 @@ python -m unittest discover -s tests -v
 - `wings/`: واجهة Python ومحوّل E3D وBootstrap داخلي.
 - `wings_installer.py`, `install_flatpak.py`, `uninstall_flatpak.py`: تثبيت وإزالة Bootstrap بطريقة آمنة وقابلة للتكرار.
 - `examples/external_cube.py`: مثال Shape Script موجود خارج مجلد الإضافة ويستخدم `from wings import Mesh` مباشرة.
+- `examples/batch_model.py`: مثال الإصدار 1.3 لإنشاء الأشكال المسطحة والمجسمات دفعة واحدة.
 - `plugin_scripts/`: ملفات تسجيل مثال Parametric Box في قائمة Wings.
 - `parametric_box.py` و`parametric_box.wscr`: مثال تشغيل منفصل عن حزمة القائمة.
 - `docs/API.md`: مرجع الواجهة.
+- `docs/PRIMITIVES_API.md`: توثيق الواجهات الجماعية والأشكال والمجسمات والدمج.
 - `docs/TEXTURE_UV_API.md`: تحميل الصور، قنوات الخامات، إسقاطات UV وحدودها.
 - `requirements.txt`: اعتماد Pillow الاختياري لعمليات الصور.
 - `examples/textured_quad.py` و`examples/brick_wall.png`: مثال Shape Script كامل مع صورة خامة تجريبية مرفقة.

@@ -175,7 +175,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
 
-    print("Wings Mesh API 1.2.0 installed successfully.")
+    print("Wings Mesh API 1.3.0 installed successfully.")
     print(f"API package: {result['api_root']}")
     print(f"Patched engine: {result['init_path']}")
     print(f"Original backup: {result['backup_path']}")

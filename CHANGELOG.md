@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.3.0 — Batch Modeling and Primitive API
+
+### Added
+- `Mesh.add_vertices()` for validated multi-vertex insertion and `Mesh.add_vertexs()` for the requested spelling plus shape presets (`sqr`, `rect`, `tri`, `circle`, `ngon`).
+- Axis and in-plane rotation options for flat shape presets.
+- Atomic `Mesh.add_faces()` and coordinate-based `Mesh.add_polygon()`.
+- `Mesh.add_primitive()` generators for cube, box, plane, pyramid, cylinder, cone, sphere and torus.
+- `Mesh.add_grid()` convenience method for subdivided planes.
+- Explicit `Mesh.weld_vertices()` / `Mesh.remove_doubles()` with old-to-new vertex mapping, optional collapsed-face removal and face-attribute remapping.
+- Primitive and batch API reference, upgrade notes and regression tests.
+
+### Compatibility
+- The 1.2.0 mesh, modeling, topology, color, material, texture and UV APIs remain available.
+- Existing `add_vertex()` and `add_face()` behavior is unchanged.
+- Batch insertion never silently merges coordinates; welding is explicit.
+
+### Verification
+- 57 unit tests pass with `python -m unittest discover -s tests -v`.
+- Live Wings 3D GUI verification is still required on the target installation.
+
+
 ## 1.2.0 — Image Textures and UV
 
 ### Added

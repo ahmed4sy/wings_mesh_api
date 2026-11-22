@@ -1,6 +1,6 @@
-# Wings Mesh API 1.2.0 — Texture and UV Release
+# Wings Mesh API 1.3.0 — Batch Modeling and Primitives
 
-A higher-level Python layer for the `wpc_scripting_shapes` extension. It builds and validates polygon meshes outside Wings, then converts them to the extension's E3D `new_shape` response inside a Shape Script.
+A higher-level Python layer for the `wpc_scripting_shapes` extension. Version 1.3 adds batch vertex/face creation, flat shape presets, parametric primitives and explicit vertex welding while retaining the 1.2 texture/UV and 1.1 color/material APIs.
 
 ## Requirements
 
@@ -33,6 +33,24 @@ def w3d_main_function(params, params_by_key, extra_params):
     mesh.project_uv(method="planar", axis="z")
     return mesh.create(prefix="TexturedQuad")
 ```
+
+
+## 1.3 batch modeling and primitive example
+
+```python
+from wings import Mesh
+
+mesh = Mesh("QuickModel")
+Vs = mesh.add_vertexs(shape="sqr", pos=(0, 0, 0), size=2)
+mesh.add_face(Vs)
+mesh.add_primitive("cube", pos=(3, 0, 0), size=2)
+mesh.add_primitive("sphere", pos=(-3, 0, 0), radius=1)
+mesh.add_grid(pos=(0, 3, 0), size=4, segments=(4, 4))
+```
+
+Use `add_vertices([...])` for explicit coordinate batches, `add_faces([...])` for multiple faces, and `add_primitive()` when the complete object topology should be generated. Batch insertion does not silently deduplicate coordinates; call `weld_vertices()` explicitly. See `docs/PRIMITIVES_API.md` for all presets, parameters and return values.
+
+The release includes `examples/batch_model.py` as a complete 1.3 Shape Script example.
 
 ## 1.2 texture and UV features
 
